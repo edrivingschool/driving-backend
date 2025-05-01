@@ -2,11 +2,12 @@
   "name": "driving-backend",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {
-  "start": "node index.js",
-  "dev": "nodemon index.js",
-  "postinstall": "npm rebuild bcrypt --build-from-source"
-},
+  
+    "scripts": {
+      "start": "node index.js",
+      "dev": "nodemon index.js",
+      "install": "npm install --build-from-source"
+    },
   "keywords": [],
   "author": "",
   "license": "ISC",
