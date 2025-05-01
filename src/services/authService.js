@@ -1,6 +1,6 @@
 const pool = require('../config/db');
 const User = require('../models/user');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 exports.createUser = async (firstName, lastName, email, phoneNumber, password) => {

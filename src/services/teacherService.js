@@ -1,6 +1,6 @@
 const pool = require('../config/db');
 const Teacher = require('../models/teacher');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 exports.createTeacher = async (firstName, lastName, email, phoneNumber, password) => {
     const client = await pool.connect();

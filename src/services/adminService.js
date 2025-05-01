@@ -1,6 +1,7 @@
 const pool = require('../config/db');
 const Admin = require('../models/admin');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
+
 
 exports.createAdmin = async (firstName, lastName, email, password) => {
     const client = await pool.connect();
