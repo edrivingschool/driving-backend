@@ -7,26 +7,28 @@ exports.register = async (data, files) => {
     try {
         const uploadedFiles = {};
         for (let key in files) {
-            const result = await s3Uploader.uploadFile(files[key][0]);
-            uploadedFiles[key + '_url'] = result.Location;
+            const file = files[key][0]; // multer gives files as arrays
+            const url = await s3Uploader.uploadToS3(file);
+            uploadedFiles[key + '_url'] = url;
+
         }
 
         const fullData = { ...data, ...uploadedFiles };
 
         const insertQuery = `
             INSERT INTO course_registrations (
-                first_name, middle_name, last_name, grand_name, age, sex, education_level,
+                first_name, middle_name, last_name, age, sex, education_level,
                 state, zone, woreda, city, kebele, phone_number,
                 emergency_contact_name, emergency_contact_phone,
                 national_id_url, educational_certificate_url, medical_report_url, user_image_url,
                 driving_license_level, school_branch
             ) VALUES ($1, $2, $3, $4, $5, $6, $7,
                       $8, $9, $10, $11, $12, $13,
-                      $14, $15, $16, $17, $18, $19, $20, $21)
+                      $14, $15, $16, $17, $18, $19, $20)
             RETURNING *`;
 
         const values = [
-            data.first_name, data.middle_name, data.last_name, data.grand_name, data.age, data.sex, data.education_level,
+            data.first_name, data.middle_name, data.last_name, data.age, data.sex, data.education_level,
             data.state, data.zone, data.woreda, data.city, data.kebele, data.phone_number,
             data.emergency_contact_name, data.emergency_contact_phone,
             uploadedFiles.national_id_url, uploadedFiles.educational_certificate_url,
@@ -40,6 +42,9 @@ exports.register = async (data, files) => {
         client.release();
     }
 };
+
+
+
 exports.getAllRegistrations = async () => {
     const client = await pool.connect();
     try {
