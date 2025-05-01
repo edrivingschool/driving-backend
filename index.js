@@ -5,6 +5,8 @@ const authRoutes = require('./src/routes/authRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
 const teacherRoutes = require('./src/routes/teacherRoutes');
 const registerRoutes = require('./src/routes/registrationRoutes');
+const courseRoutes = require('./src/routes/courseRoutes');
+const enrollmentRoutes = require('./src/routes/enrollmentRoutes')
 
 dotenv.config();
 
@@ -19,6 +21,9 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/teachers', teacherRoutes);
 app.use('/api/register', registerRoutes);
+app.use('/api/courses', courseRoutes);
+app.use('/api/enrollments', enrollmentRoutes);
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

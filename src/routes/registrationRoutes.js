@@ -1,10 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const storage = multer.memoryStorage(); // ← use memory storage
-const upload = multer({ storage });
-
-
+const upload = multer({ storage: multer.memoryStorage() });
 const registrationController = require('../controllers/registrationController');
 
 router.post(
@@ -17,9 +14,10 @@ router.post(
     ]),
     registrationController.registerUser
 );
-router.get('/', registrationController.getAllUsers);         
-router.get('/:id', registrationController.getUserById);      
-router.put('/:id', registrationController.updateUser);      
+
+router.get('/', registrationController.getAllUsers);
+router.get('/:id', registrationController.getUserById);
+router.put('/:id', registrationController.updateUser);
 router.delete('/:id', registrationController.deleteUser);
 
 module.exports = router;

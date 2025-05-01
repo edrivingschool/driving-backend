@@ -172,6 +172,8 @@ exports.resetPassword = async (email, otp, newPassword) => {
             const userCheck = await client.query(`SELECT * FROM ${table} WHERE email = $1`, [email]);
             if (userCheck.rows.length > 0) {
                 await client.query(`UPDATE ${table} SET password = $1 WHERE email = $2`, [hashed, email]);
+                await client.query('DELETE FROM password_reset_tokens WHERE email = $1 AND otp = $2', [email, otp]);
+
                 updated = true;
                 break;
             }
@@ -179,7 +181,6 @@ exports.resetPassword = async (email, otp, newPassword) => {
 
         if (!updated) throw new Error('User not found');
 
-        await client.query('DELETE FROM password_reset_tokens WHERE email = $1', [email]);
     } finally {
         client.release();
     }
