@@ -75,7 +75,14 @@ exports.register = async (data, files) => {
                 data.school_branch_id
             ]
         );
-
+        await client.query(`
+            INSERT INTO documents_verification_log (registration_id, status)
+            SELECT $1, 'pending'
+            WHERE NOT EXISTS (
+                SELECT 1 FROM documents_verification_log WHERE registration_id = $1
+            )
+        `, [regRes.rows[0].id]);
+        
         await client.query('COMMIT');
         return regRes.rows[0];
     } catch (err) {
@@ -136,7 +143,6 @@ exports.updateRegistration = async (id, data, files) => {
     try {
         await client.query('BEGIN');
 
-        // Handle file uploads
         const uploadedFiles = {};
         for (const key in files) {
             const file = files[key][0];
@@ -226,3 +232,4 @@ exports.deleteRegistration = async (id) => {
     );
     return result.rows[0];
 };
+

@@ -33,7 +33,6 @@ exports.createUser = async (firstName, lastName, email, phoneNumber, password) =
     }
 };
 
-
 exports.authenticateUser = async (identifier, password) => {
     const client = await pool.connect();
     try {
@@ -43,29 +42,44 @@ exports.authenticateUser = async (identifier, password) => {
         );
 
         if (result.rows.length === 0) {
-            return null; // No user found
+            return null;
         }
 
         const userRow = result.rows[0];
         const isMatch = await bcrypt.compare(password, userRow.password);
         if (!isMatch) {
-            return null; // Password doesn't match
+            return null;
         }
 
-        return new User(
-            userRow.id,
-            userRow.first_name,
-            userRow.last_name,
-            userRow.email,
-            userRow.phone_number,
-            null,
-            userRow.profile_picture
+        // Fetch the latest document verification status
+        const statusResult = await client.query(
+            `SELECT dvl.status
+             FROM course_registrations cr
+             JOIN documents_verification_log dvl ON cr.id = dvl.registration_id
+             WHERE cr.user_id = $1
+             ORDER BY dvl.id DESC
+             LIMIT 1`,
+            [userRow.id]
         );
+
+        const documentStatus = statusResult.rows[0]?.status || 'not_submitted';
+
+        return {
+            user: new User(
+                userRow.id,
+                userRow.first_name,
+                userRow.last_name,
+                userRow.email,
+                userRow.phone_number,
+                null,
+                userRow.profile_picture
+            ),
+            documentStatus
+        };
     } finally {
         client.release();
     }
 };
-
 
 
 

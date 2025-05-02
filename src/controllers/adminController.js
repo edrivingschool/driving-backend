@@ -44,3 +44,46 @@ exports.signin = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+
+exports.getPendingRegistrations = async (req, res) => {
+    try {
+        const data = await adminService.getPendingRegistrations();
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch pending registrations.' });
+    }
+};
+
+exports.getRegistrationById = async (req, res) => {
+    const id = req.params.id;
+    try {
+        console.log('Fetching registration with ID:', id);
+        const data = await adminService.getRegistrationById(id);
+        console.log('Fetched registration data:', data);
+        if (!data) return res.status(404).json({ error: 'Registration not found.' });
+        res.json(data);
+    } catch (err) {
+        console.error('Error fetching registration:', err);
+        res.status(500).json({ error: 'Failed to fetch registration.' });
+    }
+};
+
+exports.verifyRegistration = async (req, res) => {
+    const registrationId = req.params.id;
+    const { status, remark } = req.body;
+    const adminId = req.user.adminId;
+
+    try {
+        const result = await adminService.verifyRegistration(
+          registrationId,
+          status,
+          remark || '',
+          adminId
+        );
+        res.json(result);
+      } catch (error) {
+        console.error('Verification error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+};

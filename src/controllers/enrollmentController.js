@@ -3,7 +3,7 @@ const enrollmentService = require('../services/enrollmentService');
 
 exports.createEnrollment = async (req, res) => {
     try {
-        const studentId = req.user.id; // From decoded JWT
+        const studentId = req.user.userId;
         const courseId = req.params.courseId; // From URL
 
         const enrollment = await enrollmentService.createEnrollment(studentId, courseId);
