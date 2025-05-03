@@ -1,10 +1,18 @@
 // routes/enrollmentRoutes.js
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const enrollmentController = require('../controllers/enrollmentController');
 const { authenticate } = require('../middleware/auth');
 
-router.post('/create/:courseId', authenticate, enrollmentController.createEnrollment);
+const upload = multer();
+
+router.post(
+  '/create/:courseId',
+  upload.none(),            // 👈 This is required for text-only form data
+  authenticate,
+  createEnrollment
+);
 
 router.get('/', authenticate, enrollmentController.getAllEnrollments);
 router.get('/:id', authenticate, enrollmentController.getEnrollmentById);
