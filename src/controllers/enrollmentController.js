@@ -1,28 +1,26 @@
 const enrollmentService = require('../services/enrollmentService');
 
 exports.createEnrollment = async (req, res) => {
-    try {
-        console.log("Request Body:", req.body); // Debugging line
+  try {
+    // Get student_id from request body (sent by frontend)
+    const { student_id } = req.body;
 
-        // Safely extract student_id
-        const student_id = req.body?.student_id || req.user?.userId;
+    // Fallback to authenticated user ID if not provided
+    const studentId = student_id ? parseInt(student_id, 10) : req.user?.userId;
 
-        const courseId = req.params.courseId;
-
-        if (!student_id || isNaN(parseInt(student_id, 10))) {
-            return res.status(400).json({ 
-                error: 'Invalid or missing student ID' 
-            });
-        }
-
-        const studentId = parseInt(student_id, 10);
-
-        const enrollment = await enrollmentService.createEnrollment(studentId, courseId);
-        res.status(201).json(enrollment);
-    } catch (err) {
-        console.error("Enrollment Error:", err.message);
-        res.status(500).json({ error: err.message });
+    // Validate studentId
+    if (!studentId || isNaN(studentId)) {
+      return res.status(400).json({ error: 'Invalid or missing student ID' });
     }
+
+    const courseId = req.params.courseId;
+
+    const enrollment = await enrollmentService.createEnrollment(studentId, courseId);
+    res.status(201).json(enrollment);
+  } catch (err) {
+    console.error('Enrollment Error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
 };
 
 exports.getEnrollments = async (req, res) => {
