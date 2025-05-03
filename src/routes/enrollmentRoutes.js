@@ -1,11 +1,8 @@
 // routes/enrollmentRoutes.js
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
 const enrollmentController = require('../controllers/enrollmentController');
 const { authenticate } = require('../middleware/auth');
-
-const upload = multer();
 
 router.post('/create/:courseId', authenticate, enrollmentController.createEnrollment);
 
