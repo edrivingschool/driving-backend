@@ -3,8 +3,17 @@ const enrollmentService = require('../services/enrollmentService');
 
 exports.createEnrollment = async (req, res) => {
     try {
-        const studentId = req.user.userId;
+        // Get student_id from body (sent by frontend), fallback to req.user.userId
+        const student_id = req.body.student_id || req.user.userId;
+
         const courseId = req.params.courseId; // From URL
+
+        // Validate student_id
+        if (!student_id || isNaN(parseInt(student_id, 10))) {
+            return res.status(400).json({ error: 'Invalid or missing student ID' });
+        }
+
+        const studentId = parseInt(student_id, 10);
 
         const enrollment = await enrollmentService.createEnrollment(studentId, courseId);
         res.status(201).json(enrollment);
