@@ -7,12 +7,7 @@ const { authenticate } = require('../middleware/auth');
 
 const upload = multer();
 
-router.post(
-  '/create/:courseId',
-  upload.none(),            // 👈 This is required for text-only form data
-  authenticate,
-  createEnrollment
-);
+router.post('/create/:courseId', authenticate, enrollmentController.createEnrollment);
 
 router.get('/', authenticate, enrollmentController.getAllEnrollments);
 router.get('/:id', authenticate, enrollmentController.getEnrollmentById);
