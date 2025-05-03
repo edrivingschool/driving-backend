@@ -1,16 +1,18 @@
-// controllers/enrollmentController.js
 const enrollmentService = require('../services/enrollmentService');
 
 exports.createEnrollment = async (req, res) => {
     try {
-        // Get student_id from body (sent by frontend), fallback to req.user.userId
-        const student_id = req.body.student_id || req.user.userId;
+        console.log("Request Body:", req.body); // Debugging line
 
-        const courseId = req.params.courseId; // From URL
+        // Safely extract student_id
+        const student_id = req.body?.student_id || req.user?.userId;
 
-        // Validate student_id
+        const courseId = req.params.courseId;
+
         if (!student_id || isNaN(parseInt(student_id, 10))) {
-            return res.status(400).json({ error: 'Invalid or missing student ID' });
+            return res.status(400).json({ 
+                error: 'Invalid or missing student ID' 
+            });
         }
 
         const studentId = parseInt(student_id, 10);
@@ -18,9 +20,11 @@ exports.createEnrollment = async (req, res) => {
         const enrollment = await enrollmentService.createEnrollment(studentId, courseId);
         res.status(201).json(enrollment);
     } catch (err) {
+        console.error("Enrollment Error:", err.message);
         res.status(500).json({ error: err.message });
     }
 };
+
 exports.getEnrollments = async (req, res) => {
     try {
         const studentId = req.user.id; // From decoded JWT
