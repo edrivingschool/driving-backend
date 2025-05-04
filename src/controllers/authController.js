@@ -1,8 +1,6 @@
 const authService = require('../services/authService');
 
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET, JWT_EXPIRES_IN = '1d' } = process.env;
-
 
 exports.signup = async (req, res) => {
     const { firstName, lastName, email, phoneNumber, password } = req.body;
@@ -18,38 +16,55 @@ exports.signup = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
 exports.signin = async (req, res) => {
-  const { identifier, password } = req.body;
-  if (!identifier || !password) {
-    return res.status(400).json({ error: 'Identifier and password are required' });
-  }
+    const { identifier, password } = req.body; // identifier = email or phone number
 
-  try {
-    const user = await authService.authenticateUser(identifier, password);
-    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!identifier || !password) {
+        return res.status(400).json({ error: 'Identifier and password are required' });
+    }
 
-    // 🔥 Include user.id in the token payload
-    const token = jwt.sign(
-      { userId: user.id, role: user.role || 'student' },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
+    try {
+        const user = await authService.authenticateUser(identifier, password);
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        res.status(200).json(user); // or add JWT here if needed
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.signin = async (req, res) => {
+    const { identifier, password } = req.body;
 
-    // Return a single `user` field alongside `token`
-    return res.status(200).json({
-      message: 'Login successful',
-      token,
-      user: {
-        id:          user.id,
-        email:       user.email,
-        phoneNumber: user.phoneNumber,
-        role:        user.role || 'student'
-      }
-    });
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
-  }
+    if (!identifier || !password) {
+        return res.status(400).json({ error: 'Identifier and password are required' });
+    }
+
+    try {
+        const user = await authService.authenticateUser(identifier, password);
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        const token = jwt.sign(
+            {
+                userId: user.id,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+                role: 'student'
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
+        );
+
+        res.status(200).json({
+            message: 'Login successful',
+            token,
+            user
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 };
 
 exports.getAllUsers = async (req, res) => {
