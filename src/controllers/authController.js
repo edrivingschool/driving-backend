@@ -57,19 +57,11 @@ exports.signin = async (req, res) => {
             { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
         );
 
-res.status(200).json({
-  message: 'Login successful',
-  token,
-  documentStatus: user.documentStatus || 'not_submitted',
-  user: {
-    id:          user.id,
-    email:       user.email,
-    firstName:   user.firstName,
-    lastName:    user.lastName,
-    phoneNumber: user.phoneNumber,
-    profilePicture: user.profilePicture
-  }
-});
+        res.status(200).json({
+            message: 'Login successful',
+            token,
+            user
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
