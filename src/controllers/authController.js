@@ -16,23 +16,7 @@ exports.signup = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-exports.signin = async (req, res) => {
-    const { identifier, password } = req.body; // identifier = email or phone number
 
-    if (!identifier || !password) {
-        return res.status(400).json({ error: 'Identifier and password are required' });
-    }
-
-    try {
-        const user = await authService.authenticateUser(identifier, password);
-        if (!user) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-        res.status(200).json(user); // or add JWT here if needed
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
 exports.signin = async (req, res) => {
     const { identifier, password } = req.body;
 
