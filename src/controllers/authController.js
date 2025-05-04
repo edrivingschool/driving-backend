@@ -1,6 +1,8 @@
 const authService = require('../services/authService');
 
 const jwt = require('jsonwebtoken');
+const { JWT_SECRET, JWT_EXPIRES_IN = '1d' } = process.env;
+
 
 exports.signup = async (req, res) => {
     const { firstName, lastName, email, phoneNumber, password } = req.body;
