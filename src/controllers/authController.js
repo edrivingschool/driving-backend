@@ -18,37 +18,40 @@ exports.signup = async (req, res) => {
 };
 
 exports.signin = async (req, res) => {
-    const { identifier, password } = req.body;
+  const { identifier, password } = req.body;
+  if (!identifier || !password) {
+    return res.status(400).json({ error: 'Identifier and password are required' });
+  }
 
-    if (!identifier || !password) {
-        return res.status(400).json({ error: 'Identifier and password are required' });
-    }
+  try {
+    const user = await authService.authenticateUser(identifier, password);
+    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
 
-    try {
-        const user = await authService.authenticateUser(identifier, password);
-        if (!user) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
+    // Log to verify payload
+    console.log('▶️ Signing token for user:', { userId: user.id, role: user.role });
 
-        const token = jwt.sign(
-            {
-                userId: user.id,
-                email: user.email,
-                phoneNumber: user.phoneNumber,
-                role: 'student'
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
-        );
+    // 🔥 Embed userId in the token
+    const token = jwt.sign(
+      { userId: user.id, role: user.role },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN }
+    );
 
-        res.status(200).json({
-            message: 'Login successful',
-            token,
-            user
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    // Flatten the response shape:
+    return res.status(200).json({
+      message: 'Login successful',
+      token,
+      id:             user.id,
+      email:          user.email,
+      firstName:      user.firstName,
+      lastName:       user.lastName,
+      phoneNumber:    user.phoneNumber,
+      profilePicture: user.profilePicture,
+      documentStatus: user.documentStatus || 'not_submitted'
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
 };
 
 exports.getAllUsers = async (req, res) => {
