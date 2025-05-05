@@ -18,37 +18,43 @@ exports.signup = async (req, res) => {
 };
 exports.signin = async (req, res) => {
     const { identifier, password } = req.body;
-
     if (!identifier || !password) {
-        return res.status(400).json({ error: 'Identifier and password are required' });
+      return res.status(400).json({ error: 'Identifier and password are required' });
     }
-
+  
     try {
-        const user = await authService.authenticateUser(identifier, password);
-        if (!user) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        const token = jwt.sign(
-            {
-                userId: user.id,
-                email: user.email,
-                phoneNumber: user.phoneNumber,
-                role: 'student'
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
-        );
-
-        res.status(200).json({
-            message: 'Login successful',
-            token,
-            user
-        });
+      // 1) Grab the wrapper
+      const authResult = await authService.authenticateUser(identifier, password);
+      if (!authResult) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+  
+      // 2) Destructure out the actual user record
+      const { user, documentStatus } = authResult;
+  
+      console.log('▶️ Signing token for user:', { userId: user.id, role: user.role });
+  
+      // 3) Sign with the real values
+      const token = jwt.sign(
+        {
+          userId:      user.id,
+          email:       user.email,
+          phoneNumber: user.phoneNumber,
+          role:        user.role || 'student'
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
+      );
+  
+      return res.status(200).json({
+        message:        'Login successful',
+        token,
+        user:           authResult  // or send back { user, documentStatus }
+      });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
-};
+  };
 
 exports.getAllUsers = async (req, res) => {
     try {
