@@ -38,14 +38,21 @@ const createCourse = async (req, res) => {
     }
   };
 
-const getCourses = async (_req, res) => {
-  try {
-    const courses = await courseService.getAllCourses();
-    return successResponse(res, courses, 'Courses fetched');
-  } catch (err) {
-    return errorResponse(res, err.message);
-  }
-};
+  const getCourses = async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      if (!userId) {
+        return res.status(401).json({ status: 'error', message: 'Unauthorized: Missing user info' });
+      }
+      const courses = await courseService.getAllCoursesWithEnrollmentStatus(userId);
+      return successResponse(res, courses, 'Courses fetched');
+    } catch (err) {
+      console.error('❌ Error fetching courses:', err.message);
+      return errorResponse(res, err.message || 'Internal server error');
+    }
+  };
+  
+  
 const getCourseById = async (req, res) => {
   try {
     const { id } = req.params;

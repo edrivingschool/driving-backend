@@ -2,9 +2,17 @@ const express = require('express');
 const router = express.Router();
 const paymentController = require('../controllers/paymentController');
 const { authenticate } = require('../middleware/auth');
+const multer = require('multer');
+const storage = multer.memoryStorage(); // ← use memory storage
+const upload = multer({ storage });
 
-// Create payment (user uploads proof)
-router.post('/', paymentController.createPayment);
+// Updated route with file upload middleware
+router.post(
+  '/',
+  authenticate,
+  upload.single('paymentProof'), // 'paymentProof' is the form field name
+  paymentController.createPayment
+);
 
 // Admin gets unverified payments
 router.get('/pending', paymentController.getPendingPayments);

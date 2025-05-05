@@ -1,15 +1,34 @@
 const paymentService = require('../services/paymentService');
+const uploadToS3 = require('../utils/s3Uploader');
+
 
 exports.createPayment = async (req, res) => {
-  const { enrollmentId, amount, paymentProofUrl } = req.body;
+  const { enrollmentId, amount } = req.body;
+  const paymentProofFile = req.file; // Get uploaded file from Multer
+
+  if (!paymentProofFile) {
+    return res.status(400).json({ message: 'Payment proof file is required' });
+  }
+
   try {
-    const payment = await paymentService.createPayment(enrollmentId, amount, paymentProofUrl);
+    // Upload to S3 and get URL
+    const paymentProofUrl = await uploadToS3.uploadToS3(paymentProofFile, 'payments');
+    
+    // Create payment with the obtained URL
+    const payment = await paymentService.createPayment(
+      enrollmentId,
+      amount,
+      paymentProofUrl
+    );
+    
     res.status(201).json(payment);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Failed to create payment' });
   }
 };
+
+// ... rest of your controller methods remain unchanged
 
 exports.getPendingPayments = async (req, res) => {
   try {
@@ -23,7 +42,10 @@ exports.getPendingPayments = async (req, res) => {
 
 exports.verifyPayment = async (req, res) => {
     try {
-      const { paymentId } = req.params;
+      const paymentId = req.params.id;
+
+      console.log('Verifying payment with ID:', paymentId);
+      console.log('Admin ID:', req.user.adminId); // from token
       const adminId = req.user.adminId; // from token
       const payment = await paymentService.verifyPayment(paymentId, adminId);
       res.json(payment);
