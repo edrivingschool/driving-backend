@@ -95,3 +95,67 @@ exports.getEnrollmentsByCourseId = async (courseId) => {
         client.release();
     }
 };
+
+
+  
+  exports.getEnrollmentsByStatus = async () => {
+    const client = await pool.connect();
+    try {
+      const query = `
+        SELECT e.*, 
+          EXISTS (
+            SELECT 1 FROM payments 
+            WHERE enrollment_id = e.id AND verified = true
+          ) as has_verified_payment
+        FROM enrollments e
+        WHERE e.status = 'pending'
+      `;
+      const result = await client.query(query);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  };
+  
+  exports.approveEnrollment = async (enrollmentId) => {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      
+      // Check for verified payment
+      const paymentCheck = await client.query(
+        `SELECT 1 FROM payments 
+         WHERE enrollment_id = $1 AND verified = true LIMIT 1`,
+        [enrollmentId]
+      );
+      
+      if (paymentCheck.rows.length === 0) {
+        throw new Error('Cannot approve enrollment without verified payment');
+      }
+  
+      await client.query(
+        `UPDATE enrollments SET status = 'accepted' WHERE id = $1`,
+        [enrollmentId]
+      );
+  
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  };
+  
+  exports.rejectEnrollment = async (enrollmentId) => {
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        `UPDATE enrollments SET status = 'rejected' WHERE id = $1 RETURNING *`,
+        [enrollmentId]
+      );
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  };

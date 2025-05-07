@@ -30,8 +30,6 @@ exports.getPendingPayments = async () => {
 exports.verifyPayment = async (paymentId, adminId) => {
   const client = await pool.connect();
   try {
-    console.log('Verifying payment with ID:', paymentId);
-    console.log('Admin ID:', adminId);
     const result = await client.query(
       `UPDATE payments 
        SET verified = true, 
@@ -84,3 +82,17 @@ exports.getAllPayments = async () => {
     client.release();
   }
 };
+
+exports.rejectPayment = async (paymentId) => {
+  const client = await pool.connect();
+  try {
+    const result = await client.query(
+      `DELETE FROM payments WHERE id = $1 RETURNING *`,
+      [paymentId]
+    );
+    return result.rows[0];
+  } finally {
+    client.release();
+  }
+};
+

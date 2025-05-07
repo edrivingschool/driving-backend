@@ -9,5 +9,7 @@ router.post('/signin', adminController.signin);
 router.get('/registrations/pending', authenticate, adminController.getPendingRegistrations);
 router.get('/registration/:id', authenticate, adminController.getRegistrationById);
 router.post('/registration/:id/verify', authenticate, adminController.verifyRegistration);
+router.get('/course/all', adminController.getAllCourses);
+
 
 module.exports = router;

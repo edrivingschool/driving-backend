@@ -89,3 +89,8 @@ exports.verifyRegistration = async (registrationId, status, remarks, adminId) =>
     return result.rows[0] || null;
 };
 
+exports.getAllCourses = async () => {
+    
+      const result = await pool.query('SELECT * FROM courses ORDER BY created_at DESC');
+   return result.rows;
+};

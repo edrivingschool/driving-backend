@@ -58,13 +58,13 @@ exports.getPendingRegistrations = async (req, res) => {
 exports.getRegistrationById = async (req, res) => {
     const id = req.params.id;
     try {
-        console.log('Fetching registration with ID:', id);
+      
         const data = await adminService.getRegistrationById(id);
-        console.log('Fetched registration data:', data);
+
         if (!data) return res.status(404).json({ error: 'Registration not found.' });
         res.json(data);
     } catch (err) {
-        console.error('Error fetching registration:', err);
+
         res.status(500).json({ error: 'Failed to fetch registration.' });
     }
 };
@@ -83,7 +83,17 @@ exports.verifyRegistration = async (req, res) => {
         );
         res.json(result);
       } catch (error) {
-        console.error('Verification error:', error);
+        
         res.status(500).json({ error: 'Internal Server Error' });
       }
+};
+
+exports.getAllCourses = async (req, res) => {
+    try {
+        const courses = await adminService.getAllCourses();
+        res.status(200).json({ message: 'Courses fetched', data: courses });
+    } catch (err) {
+       
+        res.status(500).json({ error: err.message || 'Internal server error' });
+    }
 };

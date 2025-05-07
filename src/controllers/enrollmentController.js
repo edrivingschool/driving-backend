@@ -77,3 +77,32 @@ exports.getEnrollmentsByCourseId = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+exports.getPendingEnrollments = async (req, res) => {
+    try {
+      const enrollments = await enrollmentService.getEnrollmentsByStatus('pending');
+      res.json(enrollments);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  };
+  
+  exports.approveEnrollment = async (req, res) => {
+    try {
+      const enrollmentId = req.params.id;
+      const enrollment = await enrollmentService.approveEnrollment(enrollmentId);
+      res.json(enrollment);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  };
+  
+  exports.rejectEnrollment = async (req, res) => {
+    try {
+      const enrollmentId = req.params.id;
+      const enrollment = await enrollmentService.rejectEnrollment(enrollmentId);
+      res.json(enrollment);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  };

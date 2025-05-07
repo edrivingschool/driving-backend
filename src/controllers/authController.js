@@ -23,18 +23,11 @@ exports.signin = async (req, res) => {
     }
   
     try {
-      // 1) Grab the wrapper
       const authResult = await authService.authenticateUser(identifier, password);
       if (!authResult) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
-  
-      // 2) Destructure out the actual user record
       const { user, documentStatus } = authResult;
-  
-      console.log('▶️ Signing token for user:', { userId: user.id, role: user.role });
-  
-      // 3) Sign with the real values
       const token = jwt.sign(
         {
           userId:      user.id,

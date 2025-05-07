@@ -87,3 +87,15 @@ exports.getAllPayments = async (req, res) => {
     res.status(500).json({ message: 'Error fetching all payments' });
   }
 };
+
+exports.rejectPayment = async (req, res) => {
+  try {
+    const paymentId = req.params.id;
+    const adminId = req.user.adminId;
+    const payment = await paymentService.rejectPayment(paymentId, adminId);
+    res.json(payment);
+  } catch (error) {
+    console.error('Reject Payment Error:', error);
+    res.status(500).json({ error: 'Failed to reject payment' });
+  }
+};

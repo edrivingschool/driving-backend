@@ -26,5 +26,7 @@ router.get('/:id', paymentController.getPaymentById);
 // User gets payments by enrollment ID
 router.get('/enrollment/:enrollmentId', paymentController.getPaymentsByEnrollmentId);
 // User gets a payment by ID
+router.post('/:id/reject', authenticate, paymentController.rejectPayment);
+
 
 module.exports = router;
