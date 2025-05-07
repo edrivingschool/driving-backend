@@ -117,12 +117,12 @@ exports.getEnrollmentsByCourseId = async (courseId) => {
     }
   };
   
-  exports.approveEnrollment = async (enrollmentId) => {
+  exports.approveEnrollment = async (enrollmentId, teacher_id) => {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
-      
-      // Check for verified payment
+  
+      // Verify payment exists
       const paymentCheck = await client.query(
         `SELECT 1 FROM payments 
          WHERE enrollment_id = $1 AND verified = true LIMIT 1`,
@@ -133,12 +133,28 @@ exports.getEnrollmentsByCourseId = async (courseId) => {
         throw new Error('Cannot approve enrollment without verified payment');
       }
   
+      // Update enrollment status
       await client.query(
         `UPDATE enrollments SET status = 'accepted' WHERE id = $1`,
         [enrollmentId]
       );
   
+      // Get student ID from enrollment
+      const enrollmentData = await client.query(
+        `SELECT student_id FROM enrollments WHERE id = $1`,
+        [enrollmentId]
+      );
+      const student_id = enrollmentData.rows[0].student_id;
+  
+      // Assign teacher to student
+      await client.query(
+        `INSERT INTO teacher_assignments (student_id, teacher_id)
+         VALUES ($1, $2)`,
+        [student_id, teacher_id]
+      );
+  
       await client.query('COMMIT');
+      return { success: true, message: 'Enrollment approved successfully' };
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;
@@ -146,7 +162,8 @@ exports.getEnrollmentsByCourseId = async (courseId) => {
       client.release();
     }
   };
-  
+
+
   exports.rejectEnrollment = async (enrollmentId) => {
     const client = await pool.connect();
     try {

@@ -90,13 +90,19 @@ exports.getPendingEnrollments = async (req, res) => {
   exports.approveEnrollment = async (req, res) => {
     try {
       const enrollmentId = req.params.id;
-      const enrollment = await enrollmentService.approveEnrollment(enrollmentId);
-      res.json(enrollment);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
+      const { teacher_id } = req.body;
+  
+      if (!teacher_id) {
+        return res.status(400).json({ message: 'Teacher ID is required' });
+      }
+  
+      const result = await enrollmentService.approveEnrollment(enrollmentId, teacher_id);
+      res.json(result);
+    } catch (error) {
+      console.error('Error approving enrollment:', error);
+      res.status(500).json({ message: error.message });
     }
   };
-  
   exports.rejectEnrollment = async (req, res) => {
     try {
       const enrollmentId = req.params.id;

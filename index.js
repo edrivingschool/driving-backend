@@ -9,6 +9,7 @@ const courseRoutes = require('./src/routes/courseRoutes');
 const enrollmentRoutes = require('./src/routes/enrollmentRoutes')
 const paymentRoutes = require('./src/routes/paymentRoutes');
 const lessonRoutes = require('./src/routes/lessonRoutes');
+const statsRoutes = require('./src/routes/statsRoutes');
 dotenv.config();
 
 const app = express();
@@ -26,6 +27,7 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/lessons', lessonRoutes);
+app.use('/api/stats', statsRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
