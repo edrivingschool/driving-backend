@@ -20,17 +20,18 @@ const createCourse = async (title, description, price, imageUrl) => {
   const getAllCoursesWithEnrollmentStatus = async (userId) => {
     const result = await pool.query(
       `
-      SELECT 
-        c.*,
-        CASE 
-          WHEN e.id IS NOT NULL THEN TRUE
-          ELSE FALSE
-        END AS enrolled,
-        e.status AS enrollment_status  -- ✅ Include status from enrollments if exists
-      FROM courses c
-      LEFT JOIN enrollments e 
-        ON c.id = e.course_id AND e.student_id = $1
-      ORDER BY c.created_at DESC
+     SELECT 
+    c.*,
+    CASE 
+        WHEN e.id IS NOT NULL THEN TRUE
+        ELSE FALSE
+    END AS enrolled,
+    COALESCE(e.status, 'null') AS enrollment_status
+FROM courses c
+LEFT JOIN enrollments e 
+    ON c.id = e.course_id AND e.student_id = $1
+ORDER BY c.created_at DESC;
+
       `,
       [userId]
     );
