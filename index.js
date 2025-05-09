@@ -16,8 +16,10 @@ const quizRoutes = require('./src/routes/quizRoutes');
 const messageRoutes = require('./src/routes/messageRoutes');
 const videoCallRoutes = require('./src/routes/video-callRoutes');
 const progressRoutes = require('./src/routes/progressRoutes');
+const assignmentRoutes = require('./src/routes/assignmentRoutes');
 
 const { initializeSocket } = require('./src/services/socketService');
+const { assign } = require('nodemailer/lib/shared');
 
 dotenv.config();
 
@@ -44,6 +46,7 @@ app.use('/api/quizzes', quizRoutes);
 app.use('/api/message', messageRoutes);
 app.use('/api/video-call', videoCallRoutes);
 app.use('/api/progress', progressRoutes);
+app.use('/api/assignments', assignmentRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3000;

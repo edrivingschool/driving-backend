@@ -72,7 +72,7 @@ exports.register = async (data, files) => {
                 uploadedFiles.medical_report_url,
                 uploadedFiles.user_image_url,
                 data.driving_license_level,
-                data.school_branch_id
+                data.school_branch
             ]
         );
         await client.query(`
