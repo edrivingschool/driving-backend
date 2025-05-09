@@ -14,7 +14,7 @@ exports.createEnrollment = async (req, res) => {
 };
 exports.getEnrollments = async (req, res) => {
     try {
-        const studentId = req.user.id; // From decoded JWT
+        const studentId = req.user.userId; // From decoded JWT
         const enrollments = await enrollmentService.getEnrollmentsByStudentId(studentId);
         res.status(200).json(enrollments);
     } catch (err) {

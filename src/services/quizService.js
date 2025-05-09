@@ -56,40 +56,75 @@ exports.submitAnswer = async (userId, quizId, selectedOptionId) => {
 };
 
 exports.submitBatchAnswers = async (userId, lessonId, answers) => {
-    let correctCount = 0;
+  let correctCount = 0;
+  const correctAnswersMap = new Map();
 
-    for (const answer of answers) {
-        const { quiz_id, selected_option_id } = answer;
-        const optionRes = await db.query('SELECT is_correct FROM quiz_options WHERE id = $1', [selected_option_id]);
-        const isCorrect = optionRes.rows[0]?.is_correct || false;
+  // Step 1: Get all quiz IDs from the submitted answers
+  const quizIds = answers.map(answer => answer.quiz_id);
 
-        await db.query(
-            `INSERT INTO user_quiz_answers (user_id, quiz_id, selected_option_id, is_correct)
-             VALUES ($1, $2, $3, $4)
-             ON CONFLICT (user_id, quiz_id) DO UPDATE SET selected_option_id = $3, is_correct = $4`,
-            [userId, quiz_id, selected_option_id, isCorrect]
-        );
+  // Step 2: Fetch all correct options for these quizzes in one query
+  const correctOptionsRes = await db.query(
+      'SELECT quiz_id, id as option_id FROM quiz_options WHERE quiz_id = ANY($1) AND is_correct = TRUE',
+      [quizIds]
+  );
 
-        if (isCorrect) correctCount++;
-    }
+  // Step 3: Populate the map with correct options for quick lookup
+  correctOptionsRes.rows.forEach(row => {
+      correctAnswersMap.set(row.quiz_id, row.option_id);
+  });
 
-    const totalQuizzesRes = await db.query(
-        'SELECT COUNT(*) FROM quizzes WHERE lesson_id = $1',
-        [lessonId]
-    );
-    const totalQuizzes = parseInt(totalQuizzesRes.rows[0].count);
+  // Step 4: Loop through submitted answers, update the DB, and count correct answers
+  const answerDetails = [];
 
-    if (correctCount === totalQuizzes) {
-        await db.query(
-            `INSERT INTO user_lesson_progress (user_id, lesson_id, is_completed, completed_at)
-             VALUES ($1, $2, TRUE, NOW())
-             ON CONFLICT (user_id, lesson_id) DO UPDATE SET is_completed = TRUE, completed_at = NOW()`,
-            [userId, lessonId]
-        );
-    }
+  for (const answer of answers) {
+      const { quiz_id, selected_option_id } = answer;
+      const correctOptionId = correctAnswersMap.get(quiz_id) || null;
+      const isCorrect = correctOptionId === selected_option_id;
 
-    return { message: 'Batch answers submitted', correctAnswers: correctCount, totalQuizzes };
+      await db.query(
+          `INSERT INTO user_quiz_answers (user_id, quiz_id, selected_option_id, is_correct)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (user_id, quiz_id) DO UPDATE SET selected_option_id = $3, is_correct = $4`,
+          [userId, quiz_id, selected_option_id, isCorrect]
+      );
+
+      if (isCorrect) correctCount++;
+
+      // Add to the result list
+      answerDetails.push({
+          quiz_id,
+          selected_option_id,
+          isCorrect,
+          correct_option_id: correctOptionId
+      });
+  }
+
+  // Step 5: Get the total number of quizzes for this lesson
+  const totalQuizzesRes = await db.query(
+      'SELECT COUNT(*) FROM quizzes WHERE lesson_id = $1',
+      [lessonId]
+  );
+  const totalQuizzes = parseInt(totalQuizzesRes.rows[0].count);
+
+  // Step 6: Update lesson progress if all answers are correct
+  if (correctCount === totalQuizzes) {
+      await db.query(
+          `INSERT INTO user_lesson_progress (user_id, lesson_id, is_completed, completed_at)
+           VALUES ($1, $2, TRUE, NOW())
+           ON CONFLICT (user_id, lesson_id) DO UPDATE SET is_completed = TRUE, completed_at = NOW()`,
+          [userId, lessonId]
+      );
+  }
+
+  // Step 7: Return the result with the detailed list of answers
+  return {
+      message: 'Batch answers submitted',
+      correctAnswers: correctCount,
+      totalQuizzes,
+      answers: answerDetails
+  };
 };
+
 
 exports.getQuizResultsByUserId = async (userId) => {
   const results = await db.query(
