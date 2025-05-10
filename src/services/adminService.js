@@ -49,6 +49,7 @@ exports.getPendingRegistrations = async () => {
 };
 
 exports.getRegistrationById = async (id) => {
+    console.log(id);
     const result = await pool.query(`
         SELECT cr.*, 
                u.first_name, u.last_name, u.email,
@@ -57,7 +58,7 @@ exports.getRegistrationById = async (id) => {
                addr.state, addr.zone, addr.woreda, addr.city, addr.kebele,
                dl.description as license_description,
                el.description as education_description,
-               sb.name as branch_name,
+               sb.city as branch_name,
                dvl.status, dvl.remarks, dvl.verified_by, dvl.verified_at
         FROM course_registrations cr
         JOIN users u ON cr.user_id = u.id
@@ -70,7 +71,7 @@ exports.getRegistrationById = async (id) => {
         WHERE cr.id = $1
     `, [id]);
     
-
+        console.log("inside return arround"+result.rows);
     return result.rows[0] || null;
 };
 exports.verifyRegistration = async (registrationId, status, remarks, adminId) => {

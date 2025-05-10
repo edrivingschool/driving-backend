@@ -42,12 +42,18 @@ exports.sendMessage = async (req, res) => {
       type
     );
 
-    // Emit real-time message
     const io = req.app.get('io');
-    io.to(`user_${recipientId}`).emit('new_message', message);
+    if (!io) {
+      throw new Error('Real-time server not initialized');
+    }
+
+    const recipientRoom = `user_${recipientId}`;
+    console.log(`Emitting message to room: ${recipientRoom}`);
+    io.to(recipientRoom).emit('new_message', message);
 
     res.status(201).json(message);
   } catch (error) {
+    console.error('SendMessage Error:', error.message);
     res.status(500).json({ error: error.message });
   }
 };

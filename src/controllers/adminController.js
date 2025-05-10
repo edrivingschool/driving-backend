@@ -58,8 +58,9 @@ exports.getPendingRegistrations = async (req, res) => {
 exports.getRegistrationById = async (req, res) => {
     const id = req.params.id;
     try {
-      
+      console.log(id);
         const data = await adminService.getRegistrationById(id);
+        console.log(data);
 
         if (!data) return res.status(404).json({ error: 'Registration not found.' });
         res.json(data);
