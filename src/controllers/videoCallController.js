@@ -1,6 +1,6 @@
 const { generateVideoToken, generateRoomName } = require('../services/twilioService');
 const { twilioClient } = require('../config/twilio');
-const User = require('../models/User');
+const User = require('../models/user');
 
 exports.initiateCall = async (req, res) => {
   try {
