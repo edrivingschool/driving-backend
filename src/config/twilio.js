@@ -1,22 +1,31 @@
 require('dotenv').config();
 const twilio = require('twilio');
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const apiKey = process.env.TWILIO_API_KEY;
-const apiSecret = process.env.TWILIO_API_SECRET;
-
-// For regular Twilio client operations
-const twilioClient = twilio(accountSid, authToken);
-
-// For JWT token generation
-const twilioJwtConfig = {
-  accountSid,
-  apiKey,
-  apiSecret
+const validateConfig = () => {
+  const requiredVars = [
+    'TWILIO_ACCOUNT_SID',
+    'TWILIO_API_KEY',
+    'TWILIO_API_SECRET',
+    'TWILIO_AUTH_TOKEN'
+  ];
+  
+  requiredVars.forEach(varName => {
+    if (!process.env[varName]) {
+      throw new Error(`Missing required Twilio config: ${varName}`);
+    }
+  });
 };
 
+validateConfig();
+
 module.exports = {
-  twilioClient,
-  twilioJwtConfig
+  twilioClient: twilio(
+    process.env.TWILIO_ACCOUNT_SID,
+    process.env.TWILIO_AUTH_TOKEN
+  ),
+  twilioJwtConfig: {
+    accountSid: process.env.TWILIO_ACCOUNT_SID,
+    apiKey: process.env.TWILIO_API_KEY,
+    apiSecret: process.env.TWILIO_API_SECRET
+  }
 };

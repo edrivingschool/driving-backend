@@ -4,30 +4,25 @@ const VideoGrant = AccessToken.VideoGrant;
 const { twilioJwtConfig } = require('../config/twilio');
 
 const generateVideoToken = (identity, room) => {
-  if (!twilioJwtConfig.accountSid || !twilioJwtConfig.apiKey || !twilioJwtConfig.apiSecret) {
-    throw new Error('Twilio credentials not configured');
-  }
-
   const token = new AccessToken(
     twilioJwtConfig.accountSid,
     twilioJwtConfig.apiKey,
     twilioJwtConfig.apiSecret,
-    { 
-      identity,
-      ttl: 3600
-    }
+    { identity, ttl: 14400 } // 4 hour expiration
   );
 
-  const videoGrant = new VideoGrant({ 
+  const videoGrant = new VideoGrant({
     room,
     maxParticipants: 2
   });
 
   token.addGrant(videoGrant);
-  
   return token.toJwt();
 };
 
-const generateRoomName = () => `call_${uuidv4()}`;
+const generateRoomName = () => `vc-${uuidv4()}`;
 
-module.exports = { generateVideoToken, generateRoomName };
+module.exports = {
+  generateVideoToken,
+  generateRoomName
+};
