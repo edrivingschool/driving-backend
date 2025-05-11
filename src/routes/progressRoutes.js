@@ -39,4 +39,7 @@ router.get(
   progressController.getProgressByLesson
 );
 
+
+router.get('/teacher/student/:studentId/course', authenticate, progressController.getStudentProgressDetails);
+
 module.exports = router;

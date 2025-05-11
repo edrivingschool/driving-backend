@@ -68,3 +68,49 @@ exports.getProgressByLesson = async (userId, lessonId) => {
   if (!result.rows.length) return { is_completed: false, completed_at: null };
   return result.rows[0];
 };
+exports.getStudentProgressDetails = async (teacherId, studentId) => {
+    const verification = await db.query(
+        `SELECT 1 FROM teacher_assignments 
+         WHERE teacher_id = $1 AND student_id = $2`,
+        [teacherId, studentId]
+    );
+
+    if (verification.rows.length === 0) {
+        throw new Error('Unauthorized access or invalid student');
+    }
+
+    // Dynamically get the course ID the student is enrolled in (assuming 1 course per student for simplicity)
+    const courseRes = await db.query(
+        `SELECT DISTINCT l.course_id
+         FROM user_lesson_progress ulp
+         JOIN lessons l ON ulp.lesson_id = l.id
+         WHERE ulp.user_id = $1
+         LIMIT 1`,
+        [studentId]
+    );
+
+    if (courseRes.rows.length === 0) {
+        throw new Error('No course progress found for the student');
+    }
+
+    const courseId = courseRes.rows[0].course_id;
+
+
+    const result = await db.query(
+        `SELECT 
+            l.id AS lesson_id,
+            l.title AS lesson_title,
+            l.position AS lesson_position,
+            ulp.is_completed,
+            ulp.completed_at,
+            c.title AS course_title
+         FROM lessons l
+         JOIN courses c ON c.id = l.course_id
+         LEFT JOIN user_lesson_progress ulp ON ulp.lesson_id = l.id AND ulp.user_id = $1
+         WHERE l.course_id = $2
+         ORDER BY l.position ASC`,
+        [studentId, courseId]
+    );
+
+    return result.rows;
+};

@@ -59,3 +59,24 @@ exports.getProgressByLesson = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
+
+
+exports.getStudentProgressDetails = async (req, res) => {
+    try {
+        const teacherId = req.user.teacherId;
+        const {studentId} = req.params;
+        
+        const progress = await progressService.getStudentProgressDetails(teacherId, studentId);
+        res.json(progress);
+    } catch (error) {
+        console.log('Error fetching student progress details:', error);
+        console.error('Error fetching student progress details:', error);
+        if (error.message.includes('Unauthorized')) {
+            res.status(403).json({ error: error.message });
+        } else {
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+};
