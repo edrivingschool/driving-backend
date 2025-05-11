@@ -41,6 +41,28 @@ exports.getQuizzesWithOptions = async (lessonId) => {
   return result;
 };
 
+exports.getUserSubmissionsForLesson = async (userId, lessonId) => {
+  try {
+    const submissions = await db.query(
+      `SELECT 
+        qs.quiz_id,
+        qs.selected_option_id,
+        qs.is_correct,
+        qo_correct.id AS correct_option_id
+      FROM quiz_submissions qs
+      INNER JOIN quizzes q ON qs.quiz_id = q.id
+      LEFT JOIN quiz_options qo_correct ON qo_correct.quiz_id = q.id AND qo_correct.is_correct = true
+      WHERE qs.user_id = $1 AND qs.lesson_id = $2`,
+      [userId, lessonId]
+    );
+
+    return submissions.rows;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 exports.submitAnswer = async (userId, quizId, selectedOptionId) => {
     const optionRes = await db.query('SELECT is_correct FROM quiz_options WHERE id = $1', [selectedOptionId]);
     const isCorrect = optionRes.rows[0]?.is_correct || false;
