@@ -22,6 +22,21 @@ exports.getQuizzesByLesson = async (req, res) => {
   }
 };
 
+// Add this new method to quizController.js
+exports.getUserSubmissionsForLesson = async (req, res) => {
+    const { lessonId } = req.params;
+    const userId = req.user.userId;
+
+    try {
+        const submissions = await quizService.getUserSubmissionsForLesson(userId, lessonId);
+        res.json({
+            answers: submissions
+        });
+    } catch (error) {
+        console.error('Error fetching submissions:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
 
 exports.submitAnswer = async (req, res) => {
     const { quizId } = req.params;
