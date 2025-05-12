@@ -41,5 +41,23 @@ module.exports = {
       [teacherId, studentId]
     );
     return result.rows;
+  },
+  async updateMessage(id, content) {
+    const result = await pool.query(
+      `UPDATE messages SET content = $1 WHERE id = $2 RETURNING *`,
+      [content, id]
+    );
+    return result.rows[0];
+  },
+  
+  async deleteMessage(id) {
+    const result = await pool.query(
+      `DELETE FROM messages WHERE id = $1 RETURNING id`,
+      [id]
+    );
+    return result.rows[0];
   }
+  
 };
+
+

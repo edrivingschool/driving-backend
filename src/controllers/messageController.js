@@ -86,3 +86,44 @@ exports.getMessages = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
+exports.deleteMessage = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deleted = await Message.deleteMessage(id);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Message not found' });
+    }
+
+    const io = req.app.get('io');
+    io.emit('message_deleted', { id }); // Notify deletion
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('DeleteMessage Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+exports.editMessage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+
+    const updatedMessage = await Message.updateMessage(id, content);
+    if (!updatedMessage) {
+      return res.status(404).json({ error: 'Message not found' });
+    }
+
+    const io = req.app.get('io');
+    io.emit('message_edited', updatedMessage); // Broadcast update
+
+    res.json(updatedMessage);
+  } catch (error) {
+    console.error('EditMessage Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
