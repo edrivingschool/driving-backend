@@ -1,20 +1,42 @@
 const pool = require('../config/db');
 const { uploadToS3 } = require('../utils/s3Uploader');
 const pdf = require('pdf-parse');
-const extractPDFContent = async (file) => {
-    try {
-      const dataBuffer = new Uint8Array(file.data);
-      const data = await pdf(dataBuffer);
+const { getDocument } = require('pdfjs-dist/es5/build/pdf.js');
+
+const extractStructuredContent = async (file) => {
+  try {
+    const data = new Uint8Array(file.data);
+    const pdf = await getDocument(data).promise;
+    let output = '';
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
       
-      // Preserve newlines and basic formatting
-      return data.text.replace(/\n/g, '<br/>')
-                     .replace(/\t/g, '    ')
-                     .replace(/  /g, '  ');
-    } catch (err) {
-      console.error('PDF parsing error:', err);
-      throw new Error('Failed to parse PDF file');
+      content.items.forEach((item) => {
+        // Detect headings by font size
+        const fontSize = item.transform[3];
+        if (fontSize >= 16) {
+          output += `<h2 style="font-size:${fontSize}px">${item.str}</h2>`;
+        } else if (fontSize >= 12) {
+          output += `<h3 style="font-size:${fontSize}px">${item.str}</h3>`;
+        } else {
+          output += `<p style="font-size:${fontSize}px; font-family:${item.fontName}">${item.str}</p>`;
+        }
+        
+        // Preserve newlines
+        if (item.hasEOL) output += '<br/>';
+      });
     }
-  };
+    
+    return output;
+
+  } catch (err) {
+    console.error('PDF parsing error:', err);
+    throw new Error('Failed to parse PDF file');
+  }
+};
+
 
 const lessonService = {
     
@@ -28,7 +50,7 @@ const lessonService = {
                 // Convert the file buffer to Uint8Array
                 const dataBuffer = new Uint8Array(file.data);
                 const data = await pdf(dataBuffer);
-                document_content = await extractPDFContent(file);
+document_content = await extractStructuredContent(file);
             } catch (err) {
                 console.error('PDF parsing error:', err);
                 throw new Error('Failed to parse PDF file');
