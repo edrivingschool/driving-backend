@@ -110,29 +110,21 @@ exports.deleteMessage = async (req, res) => {
 
 
 exports.editMessage = async (req, res) => {
-  console.log('EditMessage called');
   try {
-    console.log('EditMessage called');
     const { id } = req.params;
-    console.log('Message ID:', id);
     const { content } = req.body;
-    console.log('Content:', content);
     userId = req.user.userId || req.user.teacherId;
-    console.log('User ID:', userId);
 
     if (!content) {
       return res.status(400).json({ error: 'Content is required to edit the message' });
     }
-    console.log('Editing message with ID:', id);
     
     const updatedMessage = await Message.updateMessage(id, content);
-    console.log('Updated Message:', updatedMessage);
     if (!updatedMessage) {
       return res.status(404).json({ error: 'Message not found' });
     }
 
     const io = req.app.get('io');
-    console.log('Emitting updated message to all clients');
     io.emit('message_updated', updatedMessage); // Notify update
 
     res.json(updatedMessage);

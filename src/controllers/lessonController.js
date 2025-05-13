@@ -3,11 +3,23 @@ const lessonService = require('../services/lessonService');
 const lessonController = {
     async create(req, res) {
         try {
-            const newLesson = await lessonService.createLesson(req.body);
+            const file = req.files?.document; // Assuming you're using express-fileupload
+            const newLesson = await lessonService.createLesson(req.body, file);
             res.status(201).json(newLesson);
         } catch (err) {
             console.error(err);
-            res.status(500).json({ error: 'Failed to create lesson' });
+            res.status(500).json({ error: err.message || 'Failed to create lesson' });
+        }
+    },
+
+    // Update other methods to remove document_url handling
+    async update(req, res) {
+        try {
+            const updated = await lessonService.updateLesson(req.params.id, req.body);
+            res.status(200).json(updated);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Failed to update lesson' });
         }
     },
 
@@ -32,15 +44,7 @@ const lessonController = {
         }
     },
 
-    async update(req, res) {
-        try {
-            const updated = await lessonService.updateLesson(req.params.id, req.body);
-            res.status(200).json(updated);
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Failed to update lesson' });
-        }
-    },
+ 
 
     async delete(req, res) {
         try {
