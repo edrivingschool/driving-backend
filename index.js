@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const dotenv = require('dotenv');
 const cors = require('cors');
-
+const setupSwagger = require('./swagger');
 const authRoutes = require('./src/routes/authRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
 const teacherRoutes = require('./src/routes/teacherRoutes');
@@ -27,6 +27,7 @@ const app = express();
 const server = http.createServer(app); // ✅ Wrap express in http.Server
 
 // Initialize Socket.IO with the server
+setupSwagger(app);
 const io = initializeSocket(server);
 app.set('io', io); // Optional: allows you to access it via req.app.get('io')
 
