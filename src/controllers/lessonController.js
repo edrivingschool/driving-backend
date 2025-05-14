@@ -15,7 +15,8 @@ const lessonController = {
     // Update other methods to remove document_url handling
     async update(req, res) {
         try {
-            const updated = await lessonService.updateLesson(req.params.id, req.body);
+            const file = req.files?.document; // Assuming you're using express-fileupload
+            const updated = await lessonService.updateLesson(req.params.id, req.body , file);
             res.status(200).json(updated);
         } catch (err) {
             console.error(err);

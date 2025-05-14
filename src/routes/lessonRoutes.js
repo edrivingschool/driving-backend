@@ -155,7 +155,7 @@ router.get('/:id', lessonController.getOne);
  *       500:
  *         description: Internal server error
  */
-router.put('/:id', lessonController.update);
+router.put('/:id',fileUpload, lessonController.update);
 
 /**
  * @swagger
