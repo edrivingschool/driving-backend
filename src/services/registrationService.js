@@ -108,7 +108,7 @@ exports.getDocumentVerificationStatus = async (userId) => {
         `, [userId]);
 
         if (result.rows.length === 0) {
-            return { status: 'not_found' };
+            return { status: 'not_submitted' };
         }
 
         return result.rows[0];
