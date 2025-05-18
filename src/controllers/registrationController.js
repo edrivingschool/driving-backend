@@ -12,6 +12,27 @@ exports.registerUser = async (req, res) => {
     }
 };
 
+exports.getDocumentStatus = async (req, res) => {
+    const userId = req.user.userId;
+    console.log('User ID:', userId);
+
+    try {
+        const statusInfo = await registrationService.getDocumentVerificationStatus(userId);
+        if (statusInfo.status === 'not_found') {
+            return res.status(404).json({ message: 'Document verification status not found for this user.' });
+        }
+
+        res.status(200).json({
+            message: 'Document verification status retrieved successfully.',
+            data: statusInfo
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+};
+
+
 exports.getAllUsers = async (req, res) => {
     try {
         const registrations = await registrationService.getAllRegistrations();

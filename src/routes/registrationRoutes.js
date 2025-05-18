@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
 const registrationController = require('../controllers/registrationController');
+const {authenticate} = require('../middleware/auth');
 
 router.post(
     '/create',
@@ -73,6 +74,12 @@ router.post(
  *         $ref: '#/components/schemas/Error'
  */
 router.get('/', registrationController.getAllUsers);
+
+
+
+
+
+router.get('/documentStatus', authenticate, registrationController.getDocumentStatus);
 
 /**
  * @swagger
@@ -164,5 +171,6 @@ router.put('/:id', registrationController.updateUser);
  *         $ref: '#/components/schemas/Error'
  */
 router.delete('/:id', registrationController.deleteUser);
+
 
 module.exports = router;

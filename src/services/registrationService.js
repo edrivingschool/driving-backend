@@ -93,6 +93,34 @@ exports.register = async (data, files) => {
     }
 };
 
+
+exports.getDocumentVerificationStatus = async (userId) => {
+    const client = await pool.connect();
+    try {
+        console.log('User ID:', userId);
+        const result = await client.query(`
+            SELECT dvl.status, dvl.verified_at, cr.id as registration_id
+            FROM course_registrations cr
+            JOIN documents_verification_log dvl ON dvl.registration_id = cr.id
+            WHERE cr.user_id = $1
+            ORDER BY dvl.verified_at DESC
+            LIMIT 1
+        `, [userId]);
+
+        if (result.rows.length === 0) {
+            return { status: 'not_found' };
+        }
+
+        return result.rows[0];
+    } catch (error) {
+        throw error;
+    } finally {
+        client.release();
+    }
+};
+
+
+
 exports.getAllRegistrations = async () => {
     const query = `
         SELECT cr.*, 
@@ -102,7 +130,7 @@ exports.getAllRegistrations = async () => {
                addr.state, addr.zone, addr.woreda, addr.city, addr.kebele,
                dl.description as license_description,
                el.description as education_description,
-               sb.name as branch_name
+               sb.city as branch_name
         FROM course_registrations cr
         JOIN users u ON cr.user_id = u.id
         JOIN emergency_contacts ec ON cr.emergency_contact_id = ec.id
@@ -124,7 +152,7 @@ exports.getRegistrationById = async (id) => {
                addr.state, addr.zone, addr.woreda, addr.city, addr.kebele,
                dl.description as license_description,
                el.description as education_description,
-               sb.name as branch_name
+               sb.city as branch_name
         FROM course_registrations cr
         JOIN users u ON cr.user_id = u.id
         JOIN emergency_contacts ec ON cr.emergency_contact_id = ec.id
