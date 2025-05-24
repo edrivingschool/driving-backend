@@ -145,7 +145,12 @@ router.get('/:id', registrationController.getUserById);
  *       500:
  *         $ref: '#/components/schemas/Error'
  */
-router.put('/:id', registrationController.updateUser);
+router.put('/:id', upload.fields([
+  { name: 'national_id', maxCount: 1 },
+  { name: 'educational_certificate', maxCount: 1 },
+  { name: 'medical_report', maxCount: 1 },
+  { name: 'user_image', maxCount: 1 }
+]), registrationController.updateUser);
 
 /**
  * @swagger

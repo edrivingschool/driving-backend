@@ -243,6 +243,16 @@ exports.updateRegistration = async (id, data, files) => {
             ]
         );
 
+        // Update documents verification log if any documents were uploaded
+        if (Object.keys(uploadedFiles).length > 0) {
+            await client.query(`
+                INSERT INTO documents_verification_log (registration_id, status, remarks)
+                VALUES ($1, 'pending', NULL)
+                ON CONFLICT (registration_id) 
+                DO UPDATE SET status = EXCLUDED.status, remarks = EXCLUDED.remarks
+            `, [id]);
+        }
+
         await client.query('COMMIT');
         return updateRes.rows[0];
     } catch (err) {

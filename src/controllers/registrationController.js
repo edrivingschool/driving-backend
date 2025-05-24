@@ -12,6 +12,19 @@ exports.registerUser = async (req, res) => {
     }
 };
 
+exports.updateUser = async (req, res) => {
+    try {
+        const updated = await registrationService.updateRegistration(
+            req.params.id,
+            req.body,
+            req.files
+        );
+        updated ? res.json(updated) : res.status(404).json({ error: 'Not found' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 exports.getDocumentStatus = async (req, res) => {
     const userId = req.user.userId;
     console.log('User ID:', userId);
@@ -53,18 +66,7 @@ exports.getUserById = async (req, res) => {
     }
 };
 
-exports.updateUser = async (req, res) => {
-    try {
-        const updated = await registrationService.updateRegistration(
-            req.params.id,
-            req.body,
-            req.files
-        );
-        updated ? res.json(updated) : res.status(404).json({ error: 'Not found' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
+
 
 exports.deleteUser = async (req, res) => {
     try {
