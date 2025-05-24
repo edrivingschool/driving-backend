@@ -99,7 +99,7 @@ exports.getDocumentVerificationStatus = async (userId) => {
     try {
         console.log('User ID:', userId);
         const result = await client.query(`
-            SELECT dvl.status, dvl.verified_at, cr.id as registration_id
+            SELECT dvl.status,dvl.remarks, dvl.verified_at, cr.id as registration_id
             FROM course_registrations cr
             JOIN documents_verification_log dvl ON dvl.registration_id = cr.id
             WHERE cr.user_id = $1
