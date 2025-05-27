@@ -2,7 +2,7 @@ const pool = require('../config/db');
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const emailService = require('../utils/emailService'); // Assuming you have an email service for sending OTPs
+const emailService = require('../utils/emailService');
 
 
 exports.createUser = async (firstName, lastName, email, phoneNumber, password) => {

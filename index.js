@@ -17,6 +17,7 @@ const messageRoutes = require('./src/routes/messageRoutes');
 const videoCallRoutes = require('./src/routes/video-callRoutes');
 const progressRoutes = require('./src/routes/progressRoutes');
 const assignmentRoutes = require('./src/routes/assignmentRoutes');
+const reportRoutes = require('./src/routes/reportRoutes');
 
 const { initializeSocket } = require('./src/services/socketService');
 const { assign } = require('nodemailer/lib/shared');
@@ -48,6 +49,7 @@ app.use('/api/message', messageRoutes);
 app.use('/api/video-call', videoCallRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/assignments', assignmentRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3000;
