@@ -223,4 +223,10 @@ router.get('/enrollment/:enrollmentId', authenticate, paymentController.getPayme
  */
 router.post('/:id/reject', authenticate, paymentController.rejectPayment);
 
+// Add new Chapa routes
+router.post('/chapa/initialize', authenticate, paymentController.initializeChapaPayment);
+router.post('/webhook/chapa', paymentController.handleChapaWebhook);
+router.get('/verify/:txRef', paymentController.verifyPaymentStatus);
+
+
 module.exports = router;
